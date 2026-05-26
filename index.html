@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Practice · 100 Questions</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e1117;--sur:#161b27;--card:#1c2333;--brd:#2a3248;
+  --ink:#e8edf5;--mut:#6b7694;--acc:#f0a500;--bl:#4a9eff;
+  --gr:#3dba7a;--rd:#e05555;
+}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;font-size:16px;min-height:100vh}
+
+/* SPLASH */
+#splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:1.5rem;background:radial-gradient(ellipse at 40% 30%,#1a2240,var(--bg))}
+.sp-badge{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);padding:.3rem 1rem;border-radius:99px}
+.sp-h1{font-size:clamp(3rem,10vw,6rem);font-weight:800;text-align:center;line-height:1}
+.sp-h1 span{color:var(--acc)}
+.sp-sub{color:var(--mut);text-align:center;max-width:420px;line-height:1.6}
+.sp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--brd);border:1px solid var(--brd);border-radius:12px;overflow:hidden;width:100%;max-width:520px}
+.sp-cell{background:var(--sur);padding:1.25rem .75rem;text-align:center}
+.sp-cell b{display:block;font-size:1.6rem;font-weight:700;color:var(--acc)}
+.sp-cell small{font-size:.65rem;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+.btn-start{background:var(--acc);color:#111;border:none;padding:.9rem 3.5rem;border-radius:8px;font-size:.9rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,165,0,.35)}
+
+/* BREAK */
+#sec-break{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:2rem;background:var(--bg)}
+.brk-icon{font-size:3rem}
+.brk-h{font-size:2rem;font-weight:700;text-align:center}
+.brk-p{color:var(--mut);text-align:center;max-width:360px}
+
+/* APP */
+#app{display:none;min-height:100vh;flex-direction:column}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(14,17,23,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:.65rem 1.25rem;gap:.75rem;flex-wrap:wrap}
+.tb-sec{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.25);padding:.25rem .7rem;border-radius:99px}
+.tb-prog{display:flex;align-items:center;gap:.5rem;flex:1}
+.prog-track{flex:1;height:3px;background:var(--brd);border-radius:99px;max-width:180px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--bl),var(--acc));border-radius:99px;transition:width .3s}
+.tb-cnt{font-size:.65rem;color:var(--mut)}
+.timer{margin-left:auto;font-size:1rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:55px;text-align:right}
+.timer.warn{color:var(--rd);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN LAYOUT */
+.main-wrap{display:flex;flex:1;min-height:0}
+
+/* QUESTION PANEL */
+.q-panel{flex:1;padding:2rem 2rem 7rem;overflow-y:auto;max-width:700px}
+.q-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem}
+.q-idx{font-size:.65rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase}
+.q-tag{font-size:.6rem;padding:.2rem .55rem;border-radius:4px;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.2);color:var(--bl);letter-spacing:.06em;text-transform:uppercase}
+.q-tag.math{background:rgba(61,186,122,.1);border-color:rgba(61,186,122,.2);color:var(--gr)}
+.passage{background:var(--sur);border:1px solid var(--brd);border-left:3px solid var(--bl);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem;color:#b0b8cc;line-height:1.75;font-style:italic}
+.q-text{font-size:1.05rem;margin-bottom:1.25rem;line-height:1.65}
+.opts{display:flex;flex-direction:column;gap:.5rem}
+.opt{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;background:var(--sur);border:1.5px solid var(--brd);border-radius:9px;cursor:pointer;transition:border-color .12s,background .12s}
+.opt:hover:not(.correct):not(.wrong){border-color:var(--bl);background:rgba(74,158,255,.05)}
+.opt.selected{border-color:var(--bl);background:rgba(74,158,255,.08)}
+.opt.correct{border-color:var(--gr)!important;background:rgba(61,186,122,.1)!important}
+.opt.wrong{border-color:var(--rd)!important;background:rgba(224,85,85,.08)!important}
+.opt-l{font-size:.7rem;font-weight:700;color:var(--mut);min-width:1.3rem;padding-top:.15rem;flex-shrink:0}
+.opt.selected .opt-l{color:var(--bl)}
+.opt.correct .opt-l{color:var(--gr)}
+.opt.wrong .opt-l{color:var(--rd)}
+.opt-t{font-size:.95rem;line-height:1.5}
+.review-ans{margin-top:1rem;padding:.9rem 1.1rem;background:rgba(61,186,122,.08);border:1px solid rgba(61,186,122,.2);border-radius:8px;font-size:.85rem;color:#3dba7a}
+.review-ans b{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+
+/* CALC PANEL */
+.calc-panel{width:360px;border-left:1px solid var(--brd);display:flex;flex-direction:column;background:var(--sur)}
+.calc-panel.hidden{display:none}
+.calc-header{padding:.6rem .9rem;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.calc-title{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.calc-clear{font-size:.65rem;background:rgba(61,186,122,.1);border:1px solid rgba(61,186,122,.25);color:var(--gr);padding:.22rem .55rem;border-radius:4px;cursor:pointer;letter-spacing:.05em}
+.calc-body{flex:1;display:flex;flex-direction:column;padding:.75rem;gap:.5rem;overflow-y:auto}
+
+/* GRAPH */
+.graph-wrap{position:relative;background:#0a0e18;border:1px solid var(--brd);border-radius:8px;overflow:hidden;flex-shrink:0}
+canvas#graph{display:block}
+.graph-controls{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap}
+.gc-btn{font-size:.65rem;background:var(--card);border:1px solid var(--brd);color:var(--mut);padding:.3rem .6rem;border-radius:5px;cursor:pointer;transition:all .12s}
+.gc-btn:hover{border-color:var(--bl);color:var(--bl)}
+.fn-input-wrap{display:flex;gap:.4rem;margin-top:.4rem}
+.fn-input{flex:1;background:var(--card);border:1px solid var(--brd);color:var(--ink);padding:.45rem .7rem;border-radius:6px;font-size:.85rem;font-family:monospace}
+.fn-input:focus{outline:none;border-color:var(--bl)}
+.fn-btn{background:var(--bl);color:#fff;border:none;padding:.45rem .8rem;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600}
+.fn-list{display:flex;flex-direction:column;gap:.3rem;margin-top:.4rem}
+.fn-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-family:monospace;background:var(--card);border:1px solid var(--brd);border-radius:5px;padding:.3rem .6rem}
+.fn-item-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fn-item-txt{flex:1;color:var(--ink)}
+.fn-item-del{background:none;border:none;color:var(--rd);cursor:pointer;font-size:.9rem;padding:0 .2rem}
+
+/* BASIC CALCULATOR */
+.basic-calc{background:var(--card);border:1px solid var(--brd);border-radius:8px;padding:.6rem}
+.calc-display{background:#0a0e18;border:1px solid var(--brd);border-radius:6px;padding:.5rem .75rem;font-family:monospace;font-size:1.2rem;text-align:right;min-height:2.4rem;color:var(--acc);word-break:break-all;margin-bottom:.5rem}
+.calc-display small{display:block;font-size:.7rem;color:var(--mut);text-align:right;min-height:1rem}
+.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem}
+.ck{background:var(--sur);border:1px solid var(--brd);color:var(--ink);padding:.6rem .2rem;border-radius:6px;cursor:pointer;font-size:.9rem;font-weight:500;transition:background .1s}
+.ck:hover{background:#252e45}
+.ck.op{color:var(--bl)}
+.ck.fn{color:var(--gr);font-size:.8rem}
+.ck.eq{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
+.ck.eq:hover{background:#d99200}
+.ck.clr{color:var(--rd)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,17,23,.97);backdrop-filter:blur(8px);border-top:1px solid var(--brd);padding:.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;z-index:100}
+.nav-btn{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.6rem 1.5rem;border-radius:7px;border:1.5px solid var(--brd);background:transparent;color:var(--ink);cursor:pointer;transition:all .12s;font-weight:600}
+.nav-btn:hover{border-color:var(--bl);color:var(--bl)}
+.nav-btn.primary{background:var(--acc);border-color:var(--acc);color:#111}
+.nav-btn.primary:hover{background:#d99200}
+.nav-btn:disabled{opacity:.3;pointer-events:none}
+.dots{display:flex;flex-wrap:wrap;gap:3px;max-width:260px;justify-content:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--brd);cursor:pointer;transition:background .12s,transform .1s;flex-shrink:0}
+.dot.ans{background:var(--bl)}
+.dot.cur{background:var(--acc);transform:scale(1.5)}
+.dot.ok{background:var(--gr)}
+.dot.no{background:var(--rd)}
+
+/* RESULTS */
+#results{display:none;min-height:100vh;padding:3rem 2rem;background:var(--bg)}
+.res-wrap{max-width:680px;margin:0 auto}
+.res-h1{font-size:2.5rem;font-weight:800;margin-bottom:2rem;text-align:center}
+.res-scores{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
+.res-sc{background:var(--sur);border:1px solid var(--brd);border-radius:10px;padding:1.5rem;text-align:center}
+.res-sc .big{display:block;font-size:2.2rem;font-weight:800;color:var(--acc)}
+.res-sc small{font-size:.65rem;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+.res-table{background:var(--sur);border:1px solid var(--brd);border-radius:10px;padding:1.25rem;margin-bottom:1.25rem}
+.res-table h3{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:1rem}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--brd)}
+.res-row:last-child{border-bottom:none}
+.res-row span{font-size:.85rem}
+.res-row b{font-family:monospace;font-size:.85rem}
+.cl-g{color:var(--gr)}.cl-y{color:var(--acc)}.cl-r{color:var(--rd)}
+.res-btns{display:flex;flex-direction:column;gap:.75rem}
+.res-btn{width:100%;padding:.9rem;border-radius:9px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.res-btn.out{background:transparent;border:1.5px solid var(--brd);color:var(--ink)}
+.res-btn.out:hover{border-color:var(--bl);color:var(--bl)}
+.res-btn.fil{background:var(--acc);border:none;color:#111}
+.res-btn.fil:hover{background:#d99200}
+
+@media(max-width:800px){.calc-panel{display:none!important}.q-panel{max-width:100%}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-badge">Digital SAT · Пробный тест</div>
+  <h1 class="sp-h1">SAT <span>100</span></h1>
+  <p class="sp-sub">50 вопросов математика + 50 английский. Встроенный калькулятор и графики для Math-разделов.</p>
+  <div class="sp-grid">
+    <div class="sp-cell"><b>50</b><small>Math</small></div>
+    <div class="sp-cell"><b>50</b><small>English</small></div>
+    <div class="sp-cell"><b>📊</b><small>Калькулятор</small></div>
+    <div class="sp-cell"><b>134м</b><small>Время</small></div>
+  </div>
+  <button class="btn-start" onclick="startTest()">Начать тест →</button>
+</div>
+
+<!-- BREAK -->
+<div id="sec-break">
+  <div class="brk-icon">☕</div>
+  <div class="brk-h" id="brk-title">Раздел завершён</div>
+  <p class="brk-p" id="brk-sub"></p>
+  <button class="btn-start" onclick="contSec()">Продолжить →</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="tb-sec" id="tb-sec">—</span>
+    <div class="tb-prog">
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <span class="tb-cnt" id="tb-cnt">0/0</span>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+  </div>
+
+  <div class="main-wrap">
+    <div class="q-panel" id="q-panel"></div>
+    <!-- BUILT-IN CALCULATOR (no CDN) -->
+    <div class="calc-panel hidden" id="calc-panel">
+      <div class="calc-header">
+        <span class="calc-title">📊 Калькулятор + Графики</span>
+        <button class="calc-clear" onclick="clearCalc()">Очистить</button>
+      </div>
+      <div class="calc-body">
+        <!-- Basic calc -->
+        <div class="basic-calc">
+          <div class="calc-display">
+            <small id="cd-expr"></small>
+            <span id="cd-val">0</span>
+          </div>
+          <div class="calc-keys" id="calc-keys"></div>
+        </div>
+        <!-- Graph -->
+        <div class="graph-wrap">
+          <canvas id="graph" width="324" height="220"></canvas>
+        </div>
+        <div class="fn-input-wrap">
+          <input class="fn-input" id="fn-input" placeholder="y=x^2-3, y=2x+1 …" onkeydown="if(event.key==='Enter')addFn()">
+          <button class="fn-btn" onclick="addFn()">График</button>
+        </div>
+        <div class="fn-list" id="fn-list"></div>
+        <div class="graph-controls">
+          <button class="gc-btn" onclick="zoomGraph(1.3)">＋ Zoom</button>
+          <button class="gc-btn" onclick="zoomGraph(0.7)">－ Zoom</button>
+          <button class="gc-btn" onclick="panGraph(-1,0)">← Pan</button>
+          <button class="gc-btn" onclick="panGraph(1,0)">→ Pan</button>
+          <button class="gc-btn" onclick="panGraph(0,1)">↑ Pan</button>
+          <button class="gc-btn" onclick="panGraph(0,-1)">↓ Pan</button>
+          <button class="gc-btn" onclick="resetView()">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">← Назад</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">Далее →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="res-wrap">
+    <h1 class="res-h1">📋 Результаты</h1>
+    <div class="res-scores" id="res-scores"></div>
+    <div class="res-table" id="res-table"></div>
+    <div class="res-btns">
+      <button class="res-btn out" onclick="doReview()">🔍 Разобрать ошибки</button>
+      <button class="res-btn fil" onclick="location.reload()">↺ Пройти снова</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════ DATA ═══════════════════════════
+const SECS=[
+{id:'m1',lbl:'Math · Модуль 1',kind:'math',min:35,qs:[
+{tag:'Algebra',q:'Solve: 5x − 3 = 2x + 9',o:['x = 2','x = 4','x = 6','x = 3'],a:1},
+{tag:'Algebra',q:'Which value satisfies 3(x + 2) = 18?',o:['x = 3','x = 4','x = 5','x = 6'],a:1},
+{tag:'Linear',q:'The line y = 2x + 5 passes through which point?',o:['(0, 2)','(1, 7)','(2, 8)','(−1, 4)'],a:1},
+{tag:'Systems',q:'Solve: x + y = 10, x − y = 4. What is x?',o:['5','6','7','8'],a:2},
+{tag:'Quadratic',q:'Solutions of x² − 9 = 0?',o:['x = ±3','x = ±9','x = 3 only','x = 0'],a:0},
+{tag:'Functions',q:'If f(x) = x² + 2x − 3, what is f(3)?',o:['6','10','12','15'],a:2},
+{tag:'Geometry',q:'A right triangle has legs 5 and 12. Hypotenuse = ?',o:['13','14','15','17'],a:0},
+{tag:'Percent',q:'35% of 200 = ?',o:['60','70','75','80'],a:1},
+{tag:'Exponents',q:'Simplify: 3² × 3³',o:['3⁵','3⁶','9⁵','27'],a:0},
+{tag:'Ratios',q:'a : b = 3 : 5 and b = 20. What is a?',o:['10','12','15','8'],a:1},
+{tag:'Slope',q:'Slope through (1, 3) and (4, 12) = ?',o:['2','3','4','5'],a:1},
+{tag:'Inequalities',q:'Which satisfies 2x + 1 > 9?',o:['x = 3','x = 4','x = 5','x = 2'],a:2},
+{tag:'Factoring',q:'Factor: x² + 5x + 6',o:['(x+2)(x+3)','(x+1)(x+6)','(x−2)(x−3)','(x+5)(x+1)'],a:0},
+{tag:'Geometry',q:'Area of a circle with radius 7?',o:['14π','49π','21π','98π'],a:1},
+{tag:'Rates',q:'180 miles in 3 hours. Speed (mph)?',o:['50','55','60','65'],a:2},
+{tag:'Algebra',q:'If 4y = 28, what is 2y + 3?',o:['14','15','17','16'],a:2},
+{tag:'Quadratic',q:'Vertex of y = x² − 4x + 7?',o:['(2, 3)','(−2, 3)','(2, 7)','(4, 7)'],a:0},
+{tag:'Statistics',q:'Mean of {6, 8, 10, 12, 14}?',o:['9','10','11','12'],a:1},
+{tag:'Proportion',q:'3 notebooks cost $7.50. Cost of 5?',o:['$10.00','$12.00','$12.50','$11.50'],a:2},
+{tag:'Algebra',q:'Simplify: (2x³)(5x²)',o:['10x⁵','7x⁵','10x⁶','7x⁶'],a:0},
+{tag:'Geometry',q:'Volume of cube, side = 4?',o:['48','64','80','16'],a:1},
+{tag:'Linear',q:'Slope −2, y-intercept 5. Which equation?',o:['y = 2x + 5','y = −2x − 5','y = −2x + 5','y = 5x − 2'],a:2},
+{tag:'Functions',q:'g(x) = 3x − 1. What is g(g(2))?',o:['10','14','15','17'],a:1},
+{tag:'Probability',q:'4 red, 6 blue marbles. P(red) = ?',o:['2/5','3/5','1/4','4/6'],a:0},
+{tag:'Exponents',q:'2⁻³ = ?',o:['−8','1/8','−1/8','8'],a:1},
+]},
+{id:'m2',lbl:'Math · Модуль 2',kind:'math',min:35,qs:[
+{tag:'Quadratic',p:'Height of a ball: h(t) = −16t² + 64t + 4.',q:'Maximum height of the ball?',o:['68 ft','72 ft','80 ft','64 ft'],a:0},
+{tag:'Exponential',q:'Population 1,000 grows 4%/year. After 2 years ≈ ?',o:['1,080','1,082','1,040','1,100'],a:1},
+{tag:'Systems',q:'Two numbers sum to 30; one is twice the other. They are:',o:['10 and 20','12 and 18','8 and 22','15 and 15'],a:0},
+{tag:'Geometry',q:'Cylinder: radius 3, height 10. Volume = ?',o:['90π','60π','30π','120π'],a:0},
+{tag:'Trig',q:'sin(30°) = 0.5, hypotenuse = 20. Opposite side = ?',o:['10','12','14','15'],a:0},
+{tag:'Polynomials',q:'Expand: (x + 4)(x − 4)',o:['x² − 16','x² + 16','x² − 8x + 16','x² + 8x − 16'],a:0},
+{tag:'Data',p:'30 students: 18 play sports, 12 read novels, 6 do both.',q:'How many do at least one activity?',o:['24','30','18','20'],a:0},
+{tag:'Algebra',q:'Solve: 3y / 4 = 12',o:['y = 9','y = 12','y = 16','y = 18'],a:2},
+{tag:'Geometry',q:'Co-interior angles (parallel lines + transversal) sum to:',o:['90°','180°','270°','360°'],a:1},
+{tag:'Functions',p:'f(x) = 2x² − 3x + 1',q:'For which value(s) of x does f(x) = 0?',o:['x = 1 or x = ½','x = 2 or x = −1','x = ½ or x = −1','x = 3 or x = 0'],a:0},
+{tag:'Statistics',q:'Median of {3, 7, 7, 9, 11, 15}?',o:['7','8','9','7.5'],a:1},
+{tag:'Rates',q:'Machine A: 120 parts/hr, B: 80/hr. Time to produce 600 together?',o:['2.5 h','3 h','3.5 h','4 h'],a:1},
+{tag:'Geometry',q:'Cone: radius 6, height 8. Volume = ? (V = ⅓πr²h)',o:['96π','288π','64π','48π'],a:0},
+{tag:'Quadratic',q:'Discriminant of 2x² − 4x + 2?',o:['0','4','−4','8'],a:0},
+{tag:'Algebra',q:'If √(x + 3) = 5, then x = ?',o:['22','23','24','25'],a:0},
+{tag:'Geometry',q:'Rectangle: perimeter 48, length 14. Width = ?',o:['8','10','12','6'],a:1},
+{tag:'Ratio',q:'Mixture: 40% alcohol, 200 ml. Add water to make 25% alcohol. How much water?',o:['100 ml','120 ml','96 ml','80 ml'],a:1},
+{tag:'Logarithm',q:'log₃(81) = ?',o:['3','4','5','9'],a:1},
+{tag:'Functions',q:'Inverse of f(x) = 2x + 6?',o:['f⁻¹(x) = (x − 6)/2','f⁻¹(x) = 2x − 6','f⁻¹(x) = x/2 + 6','f⁻¹(x) = (x + 6)/2'],a:0},
+{tag:'Statistics',q:'Standard deviation measures:',o:['The average value','The spread of data around the mean','The most common value','The middle value'],a:1},
+{tag:'Geometry',q:'Exterior angle of a regular hexagon?',o:['45°','60°','72°','90°'],a:1},
+{tag:'Algebra',q:'x² = 49, x > 0. What is 3x − 1?',o:['19','20','21','22'],a:1},
+{tag:'Systems',q:'x + 2y = 14, 3x − 2y = 6. What is x + y?',o:['8','9','10','11'],a:2},
+{tag:'Probability',q:'Two dice rolled. P(sum = 7) = ?',o:['1/6','5/36','6/36','7/36'],a:2},
+{tag:'Geometry',q:'Area of equilateral triangle with side 6?',o:['9√3','18√3','6√3','12√3'],a:0},
+]},
+{id:'e1',lbl:'English · Reading',kind:'eng',min:32,qs:[
+{tag:'Main Idea',p:'The ocean covers over 70% of Earth\'s surface and holds 97% of its water. Despite its vastness, more than 80% remains unmapped.',q:'Central idea of the passage?',o:['Oceans are being overfished','Most of Earth\'s water and ocean floor remain unexplored','Oceans cover 70% of Earth','Marine life is endangered'],a:1},
+{tag:'Inference',p:'Einstein failed his first entrance exam at Zurich Polytechnic but later received the Nobel Prize in Physics for the photoelectric effect.',q:'What can be inferred about Einstein\'s career?',o:['Early failure does not predict future success','The Nobel Prize rewards multiple achievements','Entrance exams are unreliable','Einstein was primarily a mathematician'],a:0},
+{tag:'Vocabulary',p:'The scientist\'s discovery met with vociferous opposition from colleagues who had spent decades defending the old paradigm.',q:'"Vociferous" most nearly means:',o:['Silent','Loud and forceful','Reluctant','Supportive'],a:1},
+{tag:'Evidence',p:'A 2023 WHO report found air pollution contributes to ~7 million premature deaths/year — more than HIV, TB, and malaria combined.',q:'Which detail best supports the claim that air pollution is a severe threat?',o:['The WHO published a report in 2023','Air pollution deaths exceed those from three major diseases combined','Pollution affects urban areas','Environmental standards vary by country'],a:1},
+{tag:'Tone',p:'The committee\'s decision was a spectacular exercise in shortsightedness. One wonders whether any member consulted a map before voting.',q:'Tone of the passage?',o:['Admiring','Sarcastic and critical','Neutral and factual','Hopeful'],a:1},
+{tag:'Reading',p:'Semmelweis discovered handwashing reduced deaths in maternity wards. Colleagues ridiculed him. He died in an asylum before germ theory confirmed his findings.',q:'Which sentence best captures the tragedy?',o:['Semmelweis was ahead of his time','Germ theory was not yet developed','A life-saving discovery was rejected; its discoverer died before vindication','Hospitals were dangerous in the 1800s'],a:2},
+{tag:'Structure',p:'The article first defines climate feedback loops, gives three examples, then examines consequences for global temperature projections.',q:'Organizational structure of the article?',o:['Chronological order','Cause and effect','Definition → examples → implications','Comparison and contrast'],a:2},
+{tag:'Inference',p:'The Great Wall was not built as one structure; it was extended over centuries by different dynasties.',q:'What can be inferred?',o:['The Great Wall was built in a single era','Different rulers had different defensive needs over time','The wall is a modern construction','Chinese architecture was inefficient'],a:1},
+{tag:'Vocabulary',p:'The author was known for her acerbic wit — her reviews could dismantle a novel\'s reputation in a single sentence.',q:'"Acerbic" most nearly means:',o:['Gentle','Enthusiastic','Sharp and harsh','Confused'],a:2},
+{tag:'Main Idea',p:'Bees pollinate one-third of the global food supply. Colony collapse disorder, pesticides, and habitat loss have caused alarming population declines.',q:'Primary concern of the passage?',o:['Pesticides should be banned','Bee decline threatens the global food supply','Bees are being studied by scientists','Habitats need preservation for tourism'],a:1},
+{tag:'Reading',p:'"It was the best of times, it was the worst of times" — Dickens\' paradox captures revolutionary-era extremes of wealth and poverty.',q:'The opening paradox primarily serves to:',o:['Confuse the reader','Establish a mood of chaos and extremes','Introduce the main character','Describe the geography of France'],a:1},
+{tag:'Evidence',p:'Stanford researchers found students who take handwritten notes retain information better than typists, attributing this to deeper processing required by handwriting.',q:'Which claim is directly supported?',o:['Typing is more efficient','Handwriting improves retention due to deeper processing','All students should stop using laptops','Digital tools are ineffective'],a:1},
+{tag:'Inference',p:'By 30, Mozart had composed over 600 works — symphonies, operas, chamber music. He died at 35.',q:'What is most strongly implied?',o:['Mozart died because he overworked','Mozart was extraordinarily prolific despite his short life','His music was unappreciated in his lifetime','Most composers write fewer than 600 works'],a:1},
+{tag:'Tone',p:'The volunteers worked through the night rebuilding flood-damaged homes. No one complained. No one left. They simply worked.',q:'Tone of the passage?',o:['Pessimistic','Admiring and reverent','Ironic','Scientific'],a:1},
+{tag:'Reading',p:'"Planned obsolescence" refers to designing products to become outdated after a set period, encouraging consumers to buy replacements.',q:'Purpose of planned obsolescence?',o:['Reduce manufacturing waste','Improve product quality','Drive repeat purchases','Create safer products'],a:2},
+{tag:'Vocabulary',p:'The new mayor\'s policies were pragmatic — she focused on what was achievable rather than ideal.',q:'"Pragmatic" most nearly means:',o:['Idealistic','Practical and realistic','Controversial','Conservative'],a:1},
+{tag:'Structure',p:'The essay opens with a statistic, narrates a personal anecdote, analyzes the broader pattern, and ends with a call to action.',q:'Best describes the rhetorical strategy:',o:['Pure logic','Emotional appeal + analysis','Narrative + argument','Statistical analysis only'],a:2},
+{tag:'Main Idea',p:'Languages encode entire worldviews. When a language becomes extinct, humanity loses a unique way of understanding reality.',q:'Author\'s main argument?',o:['All languages should be standardized','Language extinction is a cultural and cognitive loss','Children should learn multiple languages','Dictionaries are important'],a:1},
+{tag:'Inference',p:'Despite being written in the 1860s, Dostoevsky\'s explorations of alienation and guilt feel startlingly contemporary.',q:'"Startlingly" suggests the author finds this relevance to be:',o:['Expected and predictable','Surprising and impressive','Disappointing','Overstated'],a:1},
+{tag:'Evidence',p:'Renewable energy now accounts for 30% of global electricity, up from 20% a decade ago. Solar capacity grew 300% in five years.',q:'Statistic best supporting rapid expansion of renewables?',o:['30% of electricity from renewables','Solar grew 300% in five years','Coal use declined in Europe','Wind is popular in Denmark'],a:1},
+{tag:'Reading',p:'The placebo effect can reduce pain, lower blood pressure, and accelerate healing — all without active compounds.',q:'What conclusion does the author draw?',o:['Drugs are unnecessary','The mind measurably influences the body','Placebos should replace medicine','Pain is entirely psychological'],a:1},
+{tag:'Vocabulary',p:'The diplomat\'s response was carefully equivocal, allowing both parties to interpret it favorably.',q:'"Equivocal" most nearly means:',o:['Clear and definitive','Deliberately ambiguous','Strongly worded','Inaccurate'],a:1},
+{tag:'Tone',p:'Scientists warn — again — that we are running out of time. The deadline keeps approaching. The promises stay promises.',q:'Tone of the passage?',o:['Optimistic','Satirical','Urgent and frustrated','Celebratory'],a:2},
+{tag:'Main Idea',p:'People who engage in creative hobbies — painting, music, writing — report higher life satisfaction and lower rates of anxiety and depression.',q:'The passage primarily argues:',o:['Therapy is not effective','Creative hobbies associate with better mental health','Everyone should become an artist','Hobbies matter more than careers'],a:1},
+{tag:'Reading',p:'Tesla held 300+ patents and pioneered AC electricity, radio control, and wireless transmission — yet died in poverty and obscurity.',q:'Which theme best fits the passage?',o:['Innovation always brings reward','Genius and recognition don\'t always align','Tesla was a failed inventor','Patents don\'t protect inventors'],a:1},
+]},
+{id:'e2',lbl:'English · Writing',kind:'eng',min:32,qs:[
+{tag:'Grammar',q:'Select the grammatically correct sentence:',o:['Neither of the students have submitted their work.','Neither of the students has submitted their work.','Neither of the students has submitted his work.','Neither of the student has submitted work.'],a:1},
+{tag:'Punctuation',q:'Correctly punctuated? "The results however were inconclusive."',o:['The results, however were inconclusive.','The results however, were inconclusive.','The results, however, were inconclusive.','The results however were, inconclusive.'],a:2},
+{tag:'Conciseness',q:'Most concise version of "The reason why she left was due to the fact that she was tired":',o:['She left because she was tired.','She left due to the reason of being tired.','She left for the reason that tiredness overcame her.','Due to tiredness being the fact, she left.'],a:0},
+{tag:'Parallelism',q:'Correct parallel structure:',o:['He enjoys swimming, to run, and cycling.','He enjoys swimming, running, and cycling.','He enjoys to swim, running, and to cycle.','He enjoys swimming, run, and cycling.'],a:1},
+{tag:'Transition',q:'Best transition: "The study had a large sample. _____, its results are reliable."',o:['However','Consequently','Nevertheless','Similarly'],a:1},
+{tag:'Word Choice',q:'Best word: "The CEO\'s _____ leadership transformed the struggling company."',o:['average','visionary','moderate','adequate'],a:1},
+{tag:'Grammar',q:'Correct verb form: "The data _____ clearly supporting the hypothesis."',o:['is','are','were','have'],a:0},
+{tag:'Apostrophe',q:'Correctly uses apostrophe:',o:['The companies profits increased.','The companys\' profits increased.','The company\'s profits increased.','The companies\' profits increased.'],a:2},
+{tag:'Modifier',q:'Correctly places the modifier:',o:['Exhausted from the race, the finish line was crossed by Julia.','Julia, exhausted from the race, crossed the finish line.','The finish line, exhausted from the race, was crossed.','Exhausted, the race finished as Julia crossed the line.'],a:1},
+{tag:'Diction',q:'Most appropriate word for a formal academic paper:',o:['kids','children','youngsters','youths'],a:1},
+{tag:'Fragment',q:'Correctly fixes the fragment "Although the project was completed on time.":',o:['Although the project was completed on time, the client was satisfied.','Although. The project was completed on time.','The project, although completed on time.','Completed on time was the project.'],a:0},
+{tag:'Agreement',q:'Correct pronoun-antecedent agreement:',o:['Each student must bring their own pencil.','Each student must bring his or her own pencil.','Each student must bring its own pencil.','Each students must bring their own pencil.'],a:1},
+{tag:'Active Voice',q:'Active voice version of "The novel was written by Tolstoy over six years":',o:['Tolstoy wrote the novel over six years.','The novel, by Tolstoy, was written over six years.','Writing the novel took Tolstoy six years.','Over six years, the novel was being written by Tolstoy.'],a:0},
+{tag:'Redundancy',q:'Avoids redundancy:',o:['The new innovation was revolutionary.','The innovation was revolutionary.','The new novel innovation was revolutionary.','The revolutionary new innovation changed things.'],a:1},
+{tag:'Colon',q:'Correctly uses a colon:',o:['She had one goal: to graduate with honors.','She had one goal; to graduate with honors.','She had: one goal to graduate with honors.','She had one goal to: graduate with honors.'],a:0},
+{tag:'Fewer/Less',q:'Correct word: "There are _____ options available this semester."',o:['less','fewer','little','much'],a:1},
+{tag:'Tone',q:'Most appropriate for a formal letter of complaint:',o:['This is totally unacceptable and I\'m really upset!','I am writing to express my dissatisfaction with the service received.','Your company really messed up big time.','Fix this immediately or else.'],a:1},
+{tag:'Conjunction',q:'Correct conjunction: "She wanted to study abroad, _____ the scholarship covered only domestic universities."',o:['so','and','but','for'],a:2},
+{tag:'Comma Splice',q:'Corrects the comma splice "It was raining, the game was cancelled.":',o:['It was raining, and the game was cancelled.','It was raining the, game was cancelled.','It was raining and, the game was cancelled.','It was raining; however the game was cancelled.'],a:0},
+{tag:'Vocabulary',q:'Best single precise replacement for "very tired":',o:['fatigued','exhausted','weary','drained'],a:1},
+{tag:'Organization',q:'Most effective topic sentence for a paragraph on social media and mental health:',o:['Many people use social media daily.','Social media was created in the early 2000s.','Research links heavy social media use to anxiety and depression, especially in adolescents.','Instagram has over one billion users.'],a:2},
+{tag:'Preposition',q:'Correct preposition: "She is interested _____ pursuing a career in medicine."',o:['at','on','in','for'],a:2},
+{tag:'Tense',q:'Correct tense: "By the time she arrived, the meeting _____."',o:['ends','had ended','will end','is ending'],a:1},
+{tag:'Word Choice',q:'Correct word: "The evidence _____ that the suspect was elsewhere."',o:['implies','infers','suggests','assumes'],a:2},
+{tag:'Conciseness',q:'Most concise and clear:',o:['In light of the fact that the weather was bad, the event was cancelled.','Due to the bad weather conditions that existed, the event was cancelled.','The event was cancelled because of bad weather.','The event experienced cancellation owing to weather-related badness.'],a:2},
+]}
+];
+
+// ═════════════════ STATE ════════════════════════
+let secIdx=0,qIdx=0;
+let ans=SECS.map(s=>new Array(s.qs.length).fill(null));
+let tid=null,secs=0,rev=false;
+
+// ═════════════════ BASIC CALCULATOR ════════════
+let expr='',calcVal='0';
+const KEYS=[
+  ['7','8','9','÷','sin'],
+  ['4','5','6','×','cos'],
+  ['1','2','3','−','tan'],
+  ['0','.','(',')','+'],
+  ['±','CE','⌫','√','x²'],
+  ['π','e','%','=','='],
+];
+function buildCalcKeys(){
+  const g=document.getElementById('calc-keys');
+  g.style.gridTemplateColumns='repeat(5,1fr)';
+  g.innerHTML='';
+  [
+    {l:'7'},{l:'8'},{l:'9'},{l:'÷',op:true},{l:'sin',fn:true},
+    {l:'4'},{l:'5'},{l:'6'},{l:'×',op:true},{l:'cos',fn:true},
+    {l:'1'},{l:'2'},{l:'3'},{l:'−',op:true},{l:'tan',fn:true},
+    {l:'0'},{l:'.'},{l:'('},{l:')'},{l:'+',op:true},
+    {l:'±'},{l:'CE',clr:true},{l:'⌫'},{l:'√',fn:true},{l:'x²',fn:true},
+    {l:'π'},{l:'e'},{l:'%'},{l:'=',eq:true},{l:'=',eq:true},
+  ].forEach((k,i)=>{
+    if(i===33) return; // skip duplicate =
+    const b=document.createElement('button');
+    b.className='ck'+(k.op?' op':k.fn?' fn':k.eq?' eq':k.clr?' clr':'');
+    b.textContent=k.l;
+    b.onclick=()=>pressKey(k.l);
+    g.appendChild(b);
+  });
+}
+function pressKey(k){
+  if(k==='CE'){expr='';calcVal='0';}
+  else if(k==='⌫'){expr=expr.slice(0,-1)||(expr='');}
+  else if(k==='='){evalExpr();}
+  else if(k==='±'){expr=expr?'-('+expr+')':'';}
+  else if(k==='√'){expr='Math.sqrt('+expr+')';}
+  else if(k==='x²'){expr='('+expr+')**2';}
+  else if(k==='π'){expr+=Math.PI;}
+  else if(k==='e'){expr+=Math.E;}
+  else if(k==='sin'){expr+='Math.sin(';}
+  else if(k==='cos'){expr+='Math.cos(';}
+  else if(k==='tan'){expr+='Math.tan(';}
+  else if(k==='×'){expr+='*';}
+  else if(k==='÷'){expr+='/';}
+  else if(k==='−'){expr+='-';}
+  else if(k==='%'){expr+='/100';}
+  else{expr+=k;}
+  updCalc();
+}
+function evalExpr(){
+  try{
+    let e=expr.replace(/Math\.sin\(([^)]+)\)/g,(_,x)=>'Math.sin('+x+'*Math.PI/180)');
+    e=e.replace(/Math\.cos\(([^)]+)\)/g,(_,x)=>'Math.cos('+x+'*Math.PI/180)');
+    e=e.replace(/Math\.tan\(([^)]+)\)/g,(_,x)=>'Math.tan('+x+'*Math.PI/180)');
+    const r=eval(e);
+    calcVal=isFinite(r)?String(Math.round(r*1e10)/1e10):'Error';
+    expr=calcVal==='Error'?'':calcVal;
+  }catch{calcVal='Error';expr='';}
+  updCalc();
+}
+function updCalc(){
+  document.getElementById('cd-expr').textContent=expr||'';
+  document.getElementById('cd-val').textContent=calcVal;
+}
+function clearCalc(){expr='';calcVal='0';updCalc();fns=[];drawGraph();}
+
+// ═════════════════ GRAPH ════════════════════════
+let gView={xMin:-10,xMax:10,yMin:-7,yMax:7};
+let fns=[];
+const COLORS=['#4a9eff','#3dba7a','#f0a500','#e05555','#b06cff','#ff6cad'];
+function addFn(){
+  const inp=document.getElementById('fn-input');
+  const raw=inp.value.trim();
+  if(!raw) return;
+  inp.value='';
+  const c=COLORS[fns.length%COLORS.length];
+  fns.push({raw,c});
+  renderFnList();
+  drawGraph();
+}
+function removeFn(i){fns.splice(i,1);renderFnList();drawGraph();}
+function renderFnList(){
+  document.getElementById('fn-list').innerHTML=fns.map((f,i)=>
+    `<div class="fn-item">
+      <span class="fn-item-color" style="background:${f.c}"></span>
+      <span class="fn-item-txt">${f.raw}</span>
+      <button class="fn-item-del" onclick="removeFn(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+function parseY(raw,x){
+  // support y=expr or just expr
+  let expr=raw.replace(/^y\s*=\s*/i,'');
+  expr=expr.replace(/\^/g,'**');
+  expr=expr.replace(/(\d)(x)/g,'$1*$2');
+  expr=expr.replace(/(\))(x|\()/g,'$1*$2');
+  expr=expr.replace(/sqrt/g,'Math.sqrt');
+  expr=expr.replace(/\bsin\b/g,'Math.sin');
+  expr=expr.replace(/\bcos\b/g,'Math.cos');
+  expr=expr.replace(/\btan\b/g,'Math.tan');
+  expr=expr.replace(/\babs\b/g,'Math.abs');
+  expr=expr.replace(/\bln\b/g,'Math.log');
+  expr=expr.replace(/\blog\b/g,'Math.log10');
+  expr=expr.replace(/\bpi\b/g,'Math.PI');
+  expr=expr.replace(/\be\b/g,'Math.E');
+  try{return eval(expr.replace(/x/g,'('+x+')'));}catch{return NaN;}
+}
+function drawGraph(){
+  const cv=document.getElementById('graph');
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  ctx.fillStyle='#0a0e18';ctx.fillRect(0,0,W,H);
+  const {xMin,xMax,yMin,yMax}=gView;
+  const toX=x=>(x-xMin)/(xMax-xMin)*W;
+  const toY=y=>H-(y-yMin)/(yMax-yMin)*H;
+  // grid
+  ctx.strokeStyle='#1e2640';ctx.lineWidth=1;
+  for(let x=Math.ceil(xMin);x<=xMax;x++){
+    ctx.beginPath();ctx.moveTo(toX(x),0);ctx.lineTo(toX(x),H);ctx.stroke();
+  }
+  for(let y=Math.ceil(yMin);y<=yMax;y++){
+    ctx.beginPath();ctx.moveTo(0,toY(y));ctx.lineTo(W,toY(y));ctx.stroke();
+  }
+  // axes
+  ctx.strokeStyle='#3a4460';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(toX(0),0);ctx.lineTo(toX(0),H);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,toY(0));ctx.lineTo(W,toY(0));ctx.stroke();
+  // axis labels
+  ctx.fillStyle='#6b7694';ctx.font='9px monospace';ctx.textAlign='center';
+  for(let x=Math.ceil(xMin);x<=xMax;x+=2){
+    if(x===0) continue;
+    ctx.fillText(x,toX(x),toY(0)+11);
+  }
+  ctx.textAlign='right';
+  for(let y=Math.ceil(yMin);y<=yMax;y+=2){
+    if(y===0) continue;
+    ctx.fillText(y,toX(0)-3,toY(y)+3);
+  }
+  // functions
+  fns.forEach(f=>{
+    ctx.strokeStyle=f.c;ctx.lineWidth=2;ctx.beginPath();
+    let started=false;
+    for(let px=0;px<=W;px++){
+      const x=xMin+(px/W)*(xMax-xMin);
+      const y=parseY(f.raw,x);
+      if(isNaN(y)||!isFinite(y)){started=false;continue;}
+      const py=toY(y);
+      if(!started){ctx.moveTo(px,py);started=true;}
+      else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+  });
+}
+function zoomGraph(f){
+  const cx=(gView.xMin+gView.xMax)/2,cy=(gView.yMin+gView.yMax)/2;
+  const hw=(gView.xMax-gView.xMin)/2*f,hh=(gView.yMax-gView.yMin)/2*f;
+  gView={xMin:cx-hw,xMax:cx+hw,yMin:cy-hh,yMax:cy+hh};
+  drawGraph();
+}
+function panGraph(dx,dy){
+  const sx=(gView.xMax-gView.xMin)*.15,sy=(gView.yMax-gView.yMin)*.15;
+  gView.xMin+=dx*sx;gView.xMax+=dx*sx;
+  gView.yMin+=dy*sy;gView.yMax+=dy*sy;
+  drawGraph();
+}
+function resetView(){gView={xMin:-10,xMax:10,yMin:-7,yMax:7};drawGraph();}
+
+// ═════════════════ TEST LOGIC ════════════════════
+function startTest(){
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  buildCalcKeys();
+  drawGraph();
+  loadSec(0);
+}
+
+function loadSec(idx){
+  secIdx=idx;qIdx=0;
+  const s=SECS[idx];
+  document.getElementById('tb-sec').textContent=s.lbl;
+  secs=s.min*60;
+  clearInterval(tid);
+  tid=setInterval(tick,1000);
+  // show/hide calc
+  const cp=document.getElementById('calc-panel');
+  cp.classList.toggle('hidden',s.kind!=='math');
+  render();
+}
+
+function tick(){
+  secs--;
+  const m=String(Math.floor(secs/60)).padStart(2,'0');
+  const sc=String(secs%60).padStart(2,'0');
+  const el=document.getElementById('timer');
+  el.textContent=m+':'+sc;
+  el.className='timer'+(secs<120?' warn':'');
+  if(secs<=0){clearInterval(tid);advance();}
+}
+
+function render(){
+  const s=SECS[secIdx];
+  const q=s.qs[qIdx];
+  const a=ans[secIdx];
+  const total=s.qs.length;
+  const done=a.filter(x=>x!==null).length;
+  // progress
+  document.getElementById('prog-fill').style.width=(done/total*100)+'%';
+  document.getElementById('tb-cnt').textContent=(qIdx+1)+'/'+total;
+  // dots
+  const dotsEl=document.getElementById('dots');
+  dotsEl.innerHTML='';
+  s.qs.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot';
+    if(rev){
+      if(a[i]===s.qs[i].a) d.className+=' ok';
+      else if(a[i]!==null) d.className+=' no';
+    } else {
+      if(a[i]!==null) d.className+=' ans';
+    }
+    if(i===qIdx) d.className+=' cur';
+    d.onclick=()=>{qIdx=i;render();};
+    dotsEl.appendChild(d);
+  });
+  // nav
+  document.getElementById('btn-prev').disabled=(qIdx===0&&secIdx===0);
+  const isLQ=qIdx===total-1;
+  const isLS=secIdx===SECS.length-1;
+  const nb=document.getElementById('btn-next');
+  nb.textContent=isLQ?(isLS?'✓ Завершить':'Следующий →'):'Далее →';
+  // question
+  const letters=['A','B','C','D'];
+  let h='<div class="q-meta"><span class="q-idx">Q'+(qIdx+1)+' / '+total+'</span><span class="q-tag '+(secIdx<2?'math':'')+'">'+(q.tag||'')+'</span></div>';
+  if(q.p) h+='<div class="passage">'+q.p+'</div>';
+  h+='<div class="q-text">'+q.q.replace(/\n/g,'<br>')+'</div><div class="opts">';
+  q.o.forEach((opt,i)=>{
+    let cls='opt';
+    if(a[qIdx]===i){
+      if(rev) cls+=i===q.a?' correct':' wrong';
+      else cls+=' selected';
+    } else if(rev&&i===q.a) cls+=' correct';
+    const ck=rev?'':' onclick="pick('+i+')"';
+    h+='<div class="'+cls+'"'+ck+'><span class="opt-l">'+letters[i]+'</span><span class="opt-t">'+opt+'</span></div>';
+  });
+  h+='</div>';
+  if(rev){
+    h+='<div class="review-ans"><b>✓ Правильный ответ</b>'+letters[q.a]+': '+q.o[q.a]+'</div>';
+  }
+  document.getElementById('q-panel').innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+function pick(i){
+  ans[secIdx][qIdx]=i;
+  render();
+}
+
+function navigate(d){
+  const s=SECS[secIdx];
+  const ni=qIdx+d;
+  if(ni<0){
+    if(secIdx>0){secIdx--;qIdx=SECS[secIdx].qs.length-1;loadSec(secIdx);}
+    return;
+  }
+  if(ni>=s.qs.length){advance();return;}
+  qIdx=ni;render();
+}
+
+function advance(){
+  clearInterval(tid);
+  if(secIdx<SECS.length-1){
+    document.getElementById('app').style.display='none';
+    const br=document.getElementById('sec-break');
+    br.style.display='flex';
+    br.style.flexDirection='column';
+    document.getElementById('brk-title').textContent=SECS[secIdx].lbl+' завершён';
+    document.getElementById('brk-sub').textContent='Следующий: '+SECS[secIdx+1].lbl;
+    secIdx++;
+  } else {
+    showResults();
+  }
+}
+
+function contSec(){
+  document.getElementById('sec-break').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  loadSec(secIdx);
+}
+
+function showResults(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('results').style.display='block';
+  let totC=0,totQ=0;
+  const stats=SECS.map((s,si)=>{
+    let c=0;
+    s.qs.forEach((q,qi)=>{if(ans[si][qi]===q.a)c++;});
+    totC+=c;totQ+=s.qs.length;
+    const pct=Math.round(c/s.qs.length*100);
+    return{lbl:s.lbl,c,t:s.qs.length,pct};
+  });
+  const mC=stats[0].c+stats[1].c,mT=stats[0].t+stats[1].t;
+  const eC=stats[2].c+stats[3].c,eT=stats[2].t+stats[3].t;
+  const mS=Math.round(200+mC/mT*600);
+  const eS=Math.round(200+eC/eT*600);
+  const tot=mS+eS;
+  document.getElementById('res-scores').innerHTML=
+    '<div class="res-sc"><span class="big">'+tot+'</span><small>Общий балл / 1600</small></div>'+
+    '<div class="res-sc"><span class="big" style="color:var(--gr)">'+mS+'</span><small>Math Score</small></div>'+
+    '<div class="res-sc"><span class="big" style="color:var(--bl)">'+eS+'</span><small>EBRW Score</small></div>';
+  let bd='<h3>По разделам</h3>';
+  stats.forEach(s=>{
+    const cl=s.pct>=75?'cl-g':s.pct>=50?'cl-y':'cl-r';
+    bd+='<div class="res-row"><span>'+s.lbl+'</span><b class="'+cl+'">'+s.c+'/'+s.t+' ('+s.pct+'%)</b></div>';
+  });
+  const tp=Math.round(totC/totQ*100);
+  const cl2=tp>=75?'cl-g':tp>=50?'cl-y':'cl-r';
+  bd+='<div class="res-row" style="margin-top:.5rem;border-top:2px solid var(--brd);padding-top:.75rem"><span style="font-weight:700">Итого</span><b class="'+cl2+'" style="font-size:1rem">'+totC+'/'+totQ+' ('+tp+'%)</b></div>';
+  document.getElementById('res-table').innerHTML=bd;
+}
+
+function doReview(){
+  rev=true;secIdx=0;qIdx=0;
+  document.getElementById('results').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  document.getElementById('timer').textContent='РАЗБОР';
+  loadSec(0);
+}
+</script>
+</body>
+</html>
